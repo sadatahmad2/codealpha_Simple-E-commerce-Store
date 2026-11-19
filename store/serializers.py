@@ -18,6 +18,7 @@ class ProductSerializer(serializers.ModelSerializer):
     category = CategorySerializer(read_only=True)
     discount_percent = serializers.ReadOnlyField()
     average_rating = serializers.ReadOnlyField()
+    image_url = serializers.ReadOnlyField()
     images = ProductImageSerializer(many=True, read_only=True)
 
     class Meta:
@@ -25,7 +26,7 @@ class ProductSerializer(serializers.ModelSerializer):
         fields = [
             'id', 'name', 'slug', 'description', 'short_description',
             'category', 'price', 'discount_price', 'discount_percent',
-            'stock', 'image', 'is_featured', 'is_trending', 'is_bestseller',
+            'stock', 'image', 'image_url', 'is_featured', 'is_trending', 'is_bestseller',
             'average_rating', 'images',
         ]
 

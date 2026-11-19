@@ -43,8 +43,35 @@ class Product(models.Model):
             try:
                 return self.image.url
             except ValueError:
-                return '/static/images/placeholder.jpg'
-        return '/static/images/placeholder.jpg'
+                pass
+        
+        unsplash_images = {
+            'wireless-bluetooth-headphones': 'https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=800&auto=format&fit=crop&q=80',
+            'smart-4k-led-tv-43-inch': 'https://images.unsplash.com/photo-1593359677879-a4bb92f829d1?w=800&auto=format&fit=crop&q=80',
+            'mechanical-gaming-keyboard': 'https://images.unsplash.com/photo-1587829741301-dc798b83add3?w=800&auto=format&fit=crop&q=80',
+            'usb-c-fast-charging-power-bank-20000mah': 'https://images.unsplash.com/photo-1609592426868-8ef73d6e5a62?w=800&auto=format&fit=crop&q=80',
+            'mens-slim-fit-casual-shirt': 'https://images.unsplash.com/photo-1596755094514-f87e34085b2c?w=800&auto=format&fit=crop&q=80',
+            'womens-floral-printed-kurti': 'https://images.unsplash.com/photo-1610030469983-98e550d6193c?w=800&auto=format&fit=crop&q=80',
+            'leather-formal-shoes-men': 'https://images.unsplash.com/photo-1614252235316-8c857d38b5f4?w=800&auto=format&fit=crop&q=80',
+            'sports-sneakers-lightweight-running-shoes': 'https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=800&auto=format&fit=crop&q=80',
+            'non-stick-cookware-set-5-piece': 'https://images.unsplash.com/photo-1584990347449-39904d60920a?w=800&auto=format&fit=crop&q=80',
+            'robot-vacuum-cleaner-auto-sweep': 'https://images.unsplash.com/photo-1518770660439-4636190af475?w=800&auto=format&fit=crop&q=80',
+            'electric-kettle-1-7l-stainless-steel': 'https://images.unsplash.com/photo-1594213114663-ddf3f2a08355?w=800&auto=format&fit=crop&q=80',
+            'memory-foam-orthopaedic-pillow': 'https://images.unsplash.com/photo-1584100936595-c0654b55a2e2?w=800&auto=format&fit=crop&q=80',
+            'atomic-habits-james-clear': 'https://images.unsplash.com/photo-1544716278-ca5e3f4abd8c?w=800&auto=format&fit=crop&q=80',
+            'the-alchemist-paulo-coelho': 'https://images.unsplash.com/photo-1512820790803-83ca734da794?w=800&auto=format&fit=crop&q=80',
+            'python-crash-course-3rd-edition': 'https://images.unsplash.com/photo-1532012164546-f432f2e3777a?w=800&auto=format&fit=crop&q=80',
+            'rich-dad-poor-dad-robert-kiyosaki': 'https://images.unsplash.com/photo-1589829085413-56de8ae18c73?w=800&auto=format&fit=crop&q=80',
+            'adjustable-dumbbell-set-5-25kg': 'https://images.unsplash.com/photo-1586401100295-7a8096fd231a?w=800&auto=format&fit=crop&q=80',
+            'yoga-mat-non-slip-6mm-extra-thick': 'https://images.unsplash.com/photo-1601925260368-ae2f83cf8b7f?w=800&auto=format&fit=crop&q=80',
+            'protein-whey-isolate-chocolate-2kg': 'https://images.unsplash.com/photo-1579722821273-0f6c7d44362f?w=800&auto=format&fit=crop&q=80',
+            'resistance-bands-set-5-levels': 'https://images.unsplash.com/photo-1598289431512-b97b0917affc?w=800&auto=format&fit=crop&q=80',
+            'vitamin-c-brightening-face-serum-30ml': 'https://images.unsplash.com/photo-1620916566398-39f1143ab7be?w=800&auto=format&fit=crop&q=80',
+            'electric-toothbrush-sonic-whitening': 'https://images.unsplash.com/photo-1559591937-e160e1d15a6b?w=800&auto=format&fit=crop&q=80',
+            'blood-pressure-monitor-digital': 'https://images.unsplash.com/photo-1576091160550-2173dba999ef?w=800&auto=format&fit=crop&q=80',
+            'aloe-vera-moisturising-gel-500ml': 'https://images.unsplash.com/photo-1556228720-195a672e8a03?w=800&auto=format&fit=crop&q=80',
+        }
+        return unsplash_images.get(self.slug, '/static/images/placeholder.jpg')
 
     @property
     def discount_percent(self):

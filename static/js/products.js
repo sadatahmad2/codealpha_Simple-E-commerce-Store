@@ -121,7 +121,7 @@ function buildProductCardItem(product) {
     : '';
 
   const stars = starRatingHTML(product.average_rating || 0);
-  const imageUrl = product.image ? product.image : getPlaceholderImage(product.name);
+  const imageUrl = product.image_url || product.image || getPlaceholderImage(product.name);
   const isWishlisted = Wishlist.has(product.id);
   const outOfStock = product.stock <= 0;
 

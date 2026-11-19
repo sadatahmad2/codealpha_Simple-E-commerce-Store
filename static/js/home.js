@@ -91,7 +91,7 @@ function buildProductCard(product) {
   const stars = starRatingHTML(parseFloat(product.average_rating) || 0);
 
   /* Image */
-  const imageUrl = product.image ? product.image : '/static/images/placeholder.jpg';
+  const imageUrl = product.image_url || product.image || '/static/images/placeholder.jpg';
 
   /* Wishlist state */
   const isWishlisted = (typeof Wishlist !== 'undefined') ? Wishlist.has(product.id) : false;
