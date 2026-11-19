@@ -1,0 +1,439 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}My Dashboard{% endblock %}
+
+{% block extra_css %}
+<style>
+  .dashboard-wrapper {
+    padding: 40px 0 80px;
+  }
+  .dashboard-header-card {
+    background: linear-gradient(135deg, var(--dark) 0%, var(--dark-secondary) 100%);
+    color: #fff;
+    border-radius: var(--radius-xl);
+    padding: 36px;
+    margin-bottom: 32px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    box-shadow: var(--shadow-md);
+  }
+  .user-badge-group {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+  }
+  .avatar-circle-large {
+    width: 68px;
+    height: 68px;
+    border-radius: 50%;
+    background: var(--primary);
+    color: #fff;
+    font-size: 1.8rem;
+    font-weight: 800;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: var(--shadow-purple);
+  }
+  .user-meta h1 {
+    font-size: 1.6rem;
+    font-weight: 800;
+    margin-bottom: 4px;
+  }
+  .user-meta p {
+    color: var(--text-light);
+    font-size: 0.95rem;
+  }
+  .dashboard-stats-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 16px;
+    margin-bottom: 32px;
+  }
+  .stat-card-item {
+    background: #fff;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    padding: 20px;
+    box-shadow: var(--shadow-sm);
+    display: flex;
+    align-items: center;
+    gap: 16px;
+  }
+  .stat-icon-wrap {
+    width: 48px;
+    height: 48px;
+    border-radius: var(--radius-md);
+    background: var(--primary-50);
+    color: var(--primary);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.5rem;
+  }
+  .stat-number {
+    font-size: 1.45rem;
+    font-weight: 800;
+    color: var(--text-primary);
+  }
+  .stat-label {
+    font-size: 0.82rem;
+    color: var(--text-secondary);
+  }
+  .dashboard-main-layout {
+    display: grid;
+    grid-template-columns: 260px 1fr;
+    gap: 32px;
+    align-items: start;
+  }
+  .dashboard-sidebar-nav {
+    background: #fff;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-sm);
+    overflow: hidden;
+  }
+  .dash-nav-btn {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    width: 100%;
+    padding: 16px 20px;
+    border: none;
+    background: none;
+    text-align: left;
+    font-size: 0.95rem;
+    font-weight: 600;
+    color: var(--text-primary);
+    cursor: pointer;
+    border-bottom: 1px solid var(--border);
+    transition: all 0.2s;
+  }
+  .dash-nav-btn:hover {
+    background: var(--bg-secondary);
+    color: var(--primary);
+  }
+  .dash-nav-btn.active {
+    background: var(--primary-50);
+    color: var(--primary);
+    border-left: 4px solid var(--primary);
+  }
+  .dashboard-panel {
+    background: #fff;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-sm);
+    padding: 32px;
+    display: none;
+  }
+  .dashboard-panel.active {
+    display: block;
+    animation: fadeIn 0.3s ease;
+  }
+  .order-history-card {
+    border: 1px solid var(--border);
+    border-radius: var(--radius-md);
+    margin-bottom: 20px;
+    overflow: hidden;
+  }
+  .order-history-header {
+    background: var(--bg-secondary);
+    padding: 14px 20px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 0.9rem;
+    border-bottom: 1px solid var(--border);
+  }
+  .order-history-body {
+    padding: 20px;
+  }
+  .order-tracking-bar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin: 20px 0 10px;
+    position: relative;
+  }
+  .track-step {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    font-size: 0.78rem;
+    color: var(--text-light);
+    z-index: 2;
+  }
+  .track-dot {
+    width: 14px;
+    height: 14px;
+    border-radius: 50%;
+    background: var(--border);
+    margin-bottom: 6px;
+    transition: all 0.3s;
+  }
+  .track-step.done .track-dot {
+    background: var(--primary);
+    box-shadow: 0 0 0 4px var(--primary-100);
+  }
+  .track-step.done {
+    color: var(--primary);
+    font-weight: 600;
+  }
+  .tracking-line {
+    position: absolute;
+    top: 7px;
+    left: 20px;
+    right: 20px;
+    height: 2px;
+    background: var(--border);
+    z-index: 1;
+  }
+  @media (max-width: 992px) {
+    .dashboard-stats-grid {
+      grid-template-columns: repeat(2, 1fr);
+    }
+    .dashboard-main-layout {
+      grid-template-columns: 1fr;
+    }
+  }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container dashboard-wrapper">
+
+  <!-- Header Card -->
+  <div class="dashboard-header-card animate-on-scroll">
+    <div class="user-badge-group">
+      <div class="avatar-circle-large">
+        {{ user.first_name|first|default:user.username|first|upper }}
+      </div>
+      <div class="user-meta">
+        <h1>Welcome, {{ user.get_full_name|default:user.username }}!</h1>
+        <p>{{ user.email }} &bull; Member since {{ user.date_joined|date:"M Y" }}</p>
+      </div>
+    </div>
+    <div>
+      <span class="badge" style="background:rgba(255,255,255,0.2); color:#fff; font-size:0.9rem; padding:8px 16px;">
+        ⭐ Verified Customer
+      </span>
+    </div>
+  </div>
+
+  <!-- Key Statistics -->
+  <div class="dashboard-stats-grid">
+    <div class="stat-card-item animate-on-scroll">
+      <div class="stat-icon-wrap">📦</div>
+      <div>
+        <div class="stat-number" id="statsTotalOrders">{{ orders.count|default:'0' }}</div>
+        <div class="stat-label">Total Orders</div>
+      </div>
+    </div>
+    <div class="stat-card-item animate-on-scroll">
+      <div class="stat-icon-wrap">💰</div>
+      <div>
+        <div class="stat-number" id="statsTotalSpent">
+          ₹{{ total_spent|default:'0.00' }}
+        </div>
+        <div class="stat-label">Total Purchased</div>
+      </div>
+    </div>
+    <div class="stat-card-item animate-on-scroll">
+      <div class="stat-icon-wrap">❤️</div>
+      <div>
+        <div class="stat-number" id="statsWishlistCount">0</div>
+        <div class="stat-label">Wishlist Items</div>
+      </div>
+    </div>
+    <div class="stat-card-item animate-on-scroll">
+      <div class="stat-icon-wrap">🚚</div>
+      <div>
+        <div class="stat-number">COD</div>
+        <div class="stat-label">Preferred Payment</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Main Navigation & Panels -->
+  <div class="dashboard-main-layout">
+
+    <!-- Sidebar Navigation -->
+    <aside class="dashboard-sidebar-nav">
+      <button class="dash-nav-btn active" onclick="switchDashboardTab('orders', this)">
+        <span>📦</span> My Orders
+      </button>
+      <button class="dash-nav-btn" onclick="switchDashboardTab('profile', this)">
+        <span>👤</span> Personal Profile
+      </button>
+      <button class="dash-nav-btn" onclick="switchDashboardTab('address', this)">
+        <span>📍</span> Saved Address
+      </button>
+      <button class="dash-nav-btn" onclick="switchDashboardTab('settings', this)">
+        <span>⚙️</span> Account Settings
+      </button>
+      <button class="dash-nav-btn text-danger" onclick="logoutUser()">
+        <span>🚪</span> Log Out
+      </button>
+    </aside>
+
+    <!-- Content Panels -->
+    <div class="dashboard-content-panels">
+
+      <!-- Panel 1: Orders -->
+      <div class="dashboard-panel active" id="tabOrders">
+        <h2 style="font-size:1.4rem; font-weight:700; margin-bottom:24px;">Your Orders</h2>
+
+        {% if orders %}
+          {% for ord in orders %}
+            <div class="order-history-card">
+              <div class="order-history-header">
+                <div>
+                  <strong>Order #{{ ord.order_number }}</strong>
+                  <span style="color:var(--text-light); margin-left:10px;">{{ ord.created_at|date:"d M Y, h:i A" }}</span>
+                </div>
+                <div>
+                  <span class="badge badge-new" style="background:#6C63FF;">{{ ord.get_order_status_display }}</span>
+                </div>
+              </div>
+
+              <div class="order-history-body">
+                <!-- Items list -->
+                <div style="margin-bottom:16px;">
+                  {% for itm in ord.items.all %}
+                    <div style="display:flex; justify-content:space-between; padding:6px 0; font-size:0.95rem;">
+                      <span>{{ itm.product.name }} &times; {{ itm.quantity }}</span>
+                      <strong style="color:var(--primary);">₹{{ itm.total|floatformat:2 }}</strong>
+                    </div>
+                  {% endfor %}
+                </div>
+
+                <!-- Tracking Line -->
+                <div class="order-tracking-bar">
+                  <div class="tracking-line"></div>
+                  <div class="track-step done">
+                    <div class="track-dot"></div>
+                    <span>Processing</span>
+                  </div>
+                  <div class="track-step {% if ord.order_status == 'confirmed' or ord.order_status == 'shipped' or ord.order_status == 'delivered' %}done{% endif %}">
+                    <div class="track-dot"></div>
+                    <span>Confirmed</span>
+                  </div>
+                  <div class="track-step {% if ord.order_status == 'shipped' or ord.order_status == 'delivered' %}done{% endif %}">
+                    <div class="track-dot"></div>
+                    <span>Shipped</span>
+                  </div>
+                  <div class="track-step {% if ord.order_status == 'delivered' %}done{% endif %}">
+                    <div class="track-dot"></div>
+                    <span>Delivered</span>
+                  </div>
+                </div>
+
+                <div style="display:flex; justify-content:space-between; align-items:center; border-top:1px solid var(--border); padding-top:14px; margin-top:16px;">
+                  <span style="font-size:0.9rem; color:var(--text-secondary);">Payment: <strong>{{ ord.get_payment_method_display }}</strong> ({{ ord.get_payment_status_display }})</span>
+                  <span style="font-size:1.15rem; font-weight:800; color:var(--text-primary);">Total: ₹{{ ord.total_amount|floatformat:2 }}</span>
+                </div>
+              </div>
+            </div>
+          {% endfor %}
+        {% else %}
+          <div style="text-align:center; padding:50px 20px;">
+            <div style="font-size:3rem; margin-bottom:16px;">🛍️</div>
+            <h3>No Orders Yet</h3>
+            <p style="color:var(--text-secondary); margin:8px 0 20px;">You haven't placed any orders yet. Check out our store and get started!</p>
+            <a href="/products/" class="btn btn-primary">Start Shopping &rarr;</a>
+          </div>
+        {% endif %}
+      </div>
+
+      <!-- Panel 2: Profile -->
+      <div class="dashboard-panel" id="tabProfile">
+        <h2 style="font-size:1.4rem; font-weight:700; margin-bottom:20px;">Personal Profile</h2>
+        <form onsubmit="handleProfileUpdate(event)">
+          <div class="form-grid-2">
+            <div class="form-group">
+              <label for="profFirstName">First Name</label>
+              <input type="text" id="profFirstName" class="form-control" value="{{ user.first_name }}">
+            </div>
+            <div class="form-group">
+              <label for="profLastName">Last Name</label>
+              <input type="text" id="profLastName" class="form-control" value="{{ user.last_name }}">
+            </div>
+          </div>
+          <div class="form-grid-2">
+            <div class="form-group">
+              <label>Username</label>
+              <input type="text" class="form-control" value="{{ user.username }}" disabled style="background:var(--bg-secondary);">
+            </div>
+            <div class="form-group">
+              <label for="profEmail">Email Address</label>
+              <input type="email" id="profEmail" class="form-control" value="{{ user.email }}">
+            </div>
+          </div>
+          <div class="form-group">
+            <label for="profPhone">Phone Number</label>
+            <input type="tel" id="profPhone" class="form-control" value="{{ user.phone }}">
+          </div>
+          <button type="submit" id="saveProfileBtn" class="btn btn-primary">Save Profile Changes</button>
+        </form>
+      </div>
+
+      <!-- Panel 3: Address -->
+      <div class="dashboard-panel" id="tabAddress">
+        <h2 style="font-size:1.4rem; font-weight:700; margin-bottom:20px;">Default Shipping Address</h2>
+        <form onsubmit="handleAddressUpdate(event)">
+          <div class="form-group">
+            <label for="profAddress">Street Address / House No.</label>
+            <textarea id="profAddress" rows="3" class="form-control">{{ user.address }}</textarea>
+          </div>
+          <div class="form-grid-3">
+            <div class="form-group">
+              <label for="profCity">City</label>
+              <input type="text" id="profCity" class="form-control" value="{{ user.city }}">
+            </div>
+            <div class="form-group">
+              <label for="profState">State</label>
+              <input type="text" id="profState" class="form-control" value="{{ user.state }}">
+            </div>
+            <div class="form-group">
+              <label for="profPincode">PIN Code</label>
+              <input type="text" id="profPincode" class="form-control" value="{{ user.pincode }}" maxlength="10">
+            </div>
+          </div>
+          <button type="submit" id="saveAddressBtn" class="btn btn-primary">Update Delivery Address</button>
+        </form>
+      </div>
+
+      <!-- Panel 4: Settings -->
+      <div class="dashboard-panel" id="tabSettings">
+        <h2 style="font-size:1.4rem; font-weight:700; margin-bottom:20px;">Account Settings</h2>
+        
+        <div style="border-bottom:1px solid var(--border); padding-bottom:20px; margin-bottom:20px;">
+          <h4>Email Preferences</h4>
+          <p style="font-size:0.9rem; color:var(--text-secondary); margin:6px 0 12px;">Manage what emails you receive from NOVA MART.</p>
+          <label style="display:flex; align-items:center; gap:8px; font-size:0.9rem; cursor:pointer;">
+            <input type="checkbox" checked> Order status updates & shipment delivery tracking
+          </label>
+          <label style="display:flex; align-items:center; gap:8px; font-size:0.9rem; cursor:pointer; margin-top:8px;">
+            <input type="checkbox" checked> Promotional offers, discounts & flash sales
+          </label>
+        </div>
+
+        <div>
+          <h4>Security</h4>
+          <p style="font-size:0.9rem; color:var(--text-secondary); margin:6px 0 14px;">Keep your account credentials secure.</p>
+          <button class="btn btn-secondary btn-sm" onclick="Toast.info('Password change request sent to your registered email.')">Change Password</button>
+        </div>
+      </div>
+
+    </div>
+
+  </div>
+
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="{% static 'js/dashboard.js' %}"></script>
+{% endblock %}

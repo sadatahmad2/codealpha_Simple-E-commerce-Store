@@ -1,0 +1,376 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  {% load static %}
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="{% block meta_description %}NOVA MART - Premium Online Shopping. Fast delivery, unbeatable prices, and 24/7 customer support.{% endblock %}">
+  <title>{% block title %}Home{% endblock %} | NOVA MART - Premium Shopping</title>
+
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Poppins:wght@600;700;800&display=swap" rel="stylesheet">
+
+  <!-- Favicon SVG -->
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' rx='8' fill='%236C63FF'/><path d='M18 4L8 18h7l-3 10 12-14h-7z' fill='white'/></svg>">
+
+  <!-- Core Stylesheets -->
+  <link rel="stylesheet" href="{% static 'css/base.css' %}">
+  <link rel="stylesheet" href="{% static 'css/components.css' %}">
+  <link rel="stylesheet" href="{% static 'css/responsive.css' %}">
+  {% block extra_css %}{% endblock %}
+</head>
+<body>
+
+  <!-- =============================================
+       ANNOUNCEMENT BAR
+       ============================================= -->
+  <div class="announcement-bar" id="announcementBar">
+    <div class="announcement-content">
+      <span>🎉 <strong>FLASH SALE!</strong> Get up to 50% off today & free delivery on orders above ₹999. Use code <strong>NOVA10</strong></span>
+    </div>
+    <button class="announcement-close" id="announcementClose" aria-label="Close Announcement" onclick="closeAnnouncement()">&times;</button>
+  </div>
+
+  <!-- =============================================
+       HEADER & NAVIGATION
+       ============================================= -->
+  <header class="navbar" id="mainNavbar">
+    <div class="container nav-container">
+      
+      <!-- Logo -->
+      <a href="/" class="nav-logo">
+        <span class="logo-icon">
+          <svg viewBox="0 0 32 32" width="28" height="28" fill="none">
+            <rect width="32" height="32" rx="8" fill="url(#logo-grad)"/>
+            <path d="M18 4L8 18h7l-3 10 12-14h-7z" fill="#FFFFFF"/>
+            <defs>
+              <linearGradient id="logo-grad" x1="0" y1="0" x2="32" y2="32" gradientUnits="userSpaceOnUse">
+                <stop stop-color="#6C63FF"/>
+                <stop offset="1" stop-color="#5A52D5"/>
+              </linearGradient>
+            </defs>
+          </svg>
+        </span>
+        <span class="logo-text">NOVA<span class="logo-accent">MART</span></span>
+      </a>
+
+      <!-- Search Bar -->
+      <div class="nav-search">
+        <form class="search-form" id="searchForm" onsubmit="handleNavSearch(event)">
+          <input 
+            type="text" 
+            id="navSearchInput" 
+            placeholder="Search products, brands, categories..." 
+            class="search-input"
+            autocomplete="off"
+          >
+          <button type="submit" class="search-btn" aria-label="Search">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+              <circle cx="11" cy="11" r="8"></circle>
+              <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+            </svg>
+          </button>
+        </form>
+      </div>
+
+      <!-- Quick Nav Links (Desktop) -->
+      <nav class="nav-links">
+        <a href="/" class="nav-link">Home</a>
+        <a href="/products/" class="nav-link">Shop</a>
+        <a href="/products/?category=electronics" class="nav-link">Electronics</a>
+        <a href="/products/?category=fashion" class="nav-link">Fashion</a>
+      </nav>
+
+      <!-- Nav Actions -->
+      <div class="nav-actions">
+        <!-- Wishlist Link -->
+        <a href="/products/?wishlist=true" class="action-btn wishlist-icon-link" title="Wishlist">
+          <span class="icon-wrap">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path>
+            </svg>
+            <span class="badge-count wishlist-count" id="wishlistCountBadge" style="display:none;">0</span>
+          </span>
+        </a>
+
+        <!-- Cart Link -->
+        <a href="/cart/" class="action-btn cart-icon-link" title="Shopping Cart">
+          <span class="icon-wrap">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <circle cx="9" cy="21" r="1"></circle>
+              <circle cx="20" cy="21" r="1"></circle>
+              <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"></path>
+            </svg>
+            <span class="badge-count cart-count" id="cartCountBadge" style="display:none;">0</span>
+          </span>
+        </a>
+
+        <!-- Auth / Profile -->
+        {% if user.is_authenticated %}
+          <div class="user-menu-dropdown" id="userMenuDropdown">
+            <button class="user-menu-btn" onclick="toggleUserMenu()" aria-expanded="false">
+              <span class="user-avatar-small">{{ user.first_name|first|default:user.username|first|upper }}</span>
+              <span class="user-name-text">{{ user.first_name|default:user.username }}</span>
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <polyline points="6 9 12 15 18 9"></polyline>
+              </svg>
+            </button>
+            <div class="dropdown-menu" id="userDropdownContent">
+              <div class="dropdown-header">
+                <strong>{{ user.get_full_name|default:user.username }}</strong>
+                <small>{{ user.email }}</small>
+              </div>
+              <a href="/dashboard/" class="dropdown-item">📦 Dashboard & Orders</a>
+              <a href="/dashboard/#profile" class="dropdown-item">👤 Profile Settings</a>
+              <a href="/dashboard/#address" class="dropdown-item">📍 Delivery Address</a>
+              {% if user.is_staff %}
+                <a href="/admin/" target="_blank" class="dropdown-item">⚙️ Django Admin</a>
+              {% endif %}
+              <div class="dropdown-divider"></div>
+              <a href="javascript:void(0)" onclick="logoutUser()" class="dropdown-item text-danger">🚪 Logout</a>
+            </div>
+          </div>
+        {% else %}
+          <div class="auth-buttons">
+            <a href="/login/" class="btn btn-secondary btn-sm">Login</a>
+            <a href="/register/" class="btn btn-primary btn-sm">Sign Up</a>
+          </div>
+        {% endif %}
+
+        <!-- Mobile Hamburger Button -->
+        <button class="hamburger-btn" id="mobileMenuToggle" aria-label="Toggle menu" onclick="toggleMobileNav()">
+          <span></span>
+          <span></span>
+          <span></span>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- =============================================
+       MOBILE SLIDEOUT MENU
+       ============================================= -->
+  <div class="mobile-drawer-overlay" id="mobileDrawerOverlay" onclick="toggleMobileNav()"></div>
+  <aside class="mobile-drawer" id="mobileDrawer">
+    <div class="mobile-drawer-header">
+      <div class="drawer-logo">
+        <span class="logo-text">NOVA<span class="logo-accent">MART</span></span>
+      </div>
+      <button class="drawer-close" onclick="toggleMobileNav()">&times;</button>
+    </div>
+    
+    <div class="mobile-search-wrap">
+      <form onsubmit="handleNavSearch(event)">
+        <input type="text" id="mobileSearchInput" placeholder="Search products..." class="search-input">
+        <button type="submit" class="search-btn">🔍</button>
+      </form>
+    </div>
+
+    <nav class="mobile-nav-links">
+      <a href="/" class="mobile-link" onclick="toggleMobileNav()">🏠 Home</a>
+      <a href="/products/" class="mobile-link" onclick="toggleMobileNav()">🛍️ All Products</a>
+      <a href="/products/?category=electronics" class="mobile-link" onclick="toggleMobileNav()">📱 Electronics</a>
+      <a href="/products/?category=fashion" class="mobile-link" onclick="toggleMobileNav()">👗 Fashion</a>
+      <a href="/products/?category=home-kitchen" class="mobile-link" onclick="toggleMobileNav()">🏠 Home & Kitchen</a>
+      <a href="/products/?category=sports-fitness" class="mobile-link" onclick="toggleMobileNav()">⚽ Sports & Fitness</a>
+      <a href="/cart/" class="mobile-link" onclick="toggleMobileNav()">🛒 Shopping Cart</a>
+      
+      <div class="mobile-drawer-divider"></div>
+      
+      {% if user.is_authenticated %}
+        <a href="/dashboard/" class="mobile-link" onclick="toggleMobileNav()">📦 My Dashboard & Orders</a>
+        <a href="/dashboard/#profile" class="mobile-link" onclick="toggleMobileNav()">👤 Profile Settings</a>
+        <a href="javascript:void(0)" onclick="logoutUser()" class="mobile-link text-danger">🚪 Logout</a>
+      {% else %}
+        <div class="mobile-auth-links">
+          <a href="/login/" class="btn btn-secondary btn-block" onclick="toggleMobileNav()">Login</a>
+          <a href="/register/" class="btn btn-primary btn-block" onclick="toggleMobileNav()">Sign Up</a>
+        </div>
+      {% endif %}
+    </nav>
+  </aside>
+
+  <!-- =============================================
+       MAIN CONTENT
+       ============================================= -->
+  <main class="main-content" id="mainContent">
+    {% block content %}{% endblock %}
+  </main>
+
+  <!-- =============================================
+       FOOTER
+       ============================================= -->
+  <footer class="footer">
+    <div class="container footer-container">
+      <div class="footer-grid">
+        
+        <!-- Brand Column -->
+        <div class="footer-brand">
+          <a href="/" class="nav-logo footer-logo">
+            <span class="logo-icon">
+              <svg viewBox="0 0 32 32" width="24" height="24" fill="none">
+                <rect width="32" height="32" rx="8" fill="#6C63FF"/>
+                <path d="M18 4L8 18h7l-3 10 12-14h-7z" fill="#FFFFFF"/>
+              </svg>
+            </span>
+            <span class="logo-text">NOVA<span class="logo-accent">MART</span></span>
+          </a>
+          <p class="footer-desc">
+            Your destination for modern, premium online shopping. Built with Django and pure vanilla web standards. Developed for CodeAlpha Full Stack Internship.
+          </p>
+          <div class="social-links">
+            <a href="https://github.com" target="_blank" rel="noopener" class="social-icon" aria-label="GitHub">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0 0 24 12c0-6.63-5.37-12-12-12z"/></svg>
+            </a>
+            <a href="https://linkedin.com" target="_blank" rel="noopener" class="social-icon" aria-label="LinkedIn">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M19 0h-14c-2.761 0-5 2.239-5 5v14c0 2.761 2.239 5 5 5h14c2.762 0 5-2.239 5-5v-14c0-2.761-2.238-5-5-5zm-11 19h-3v-11h3v11zm-1.5-12.268c-.966 0-1.75-.79-1.75-1.764s.784-1.764 1.75-1.764 1.75.79 1.75 1.764-.783 1.764-1.75 1.764zm13.5 12.268h-3v-5.604c0-3.368-4-3.113-4 0v5.604h-3v-11h3v1.765c1.396-2.586 7-2.777 7 2.476v6.759z"/></svg>
+            </a>
+            <a href="https://twitter.com" target="_blank" rel="noopener" class="social-icon" aria-label="Twitter">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>
+            </a>
+          </div>
+        </div>
+
+        <!-- Quick Links -->
+        <div class="footer-links">
+          <h4 class="footer-title">Quick Links</h4>
+          <ul>
+            <li><a href="/">Home</a></li>
+            <li><a href="/products/">All Products</a></li>
+            <li><a href="/cart/">Shopping Cart</a></li>
+            <li><a href="/dashboard/">My Orders</a></li>
+            <li><a href="/dashboard/#profile">My Profile</a></li>
+          </ul>
+        </div>
+
+        <!-- Categories -->
+        <div class="footer-links">
+          <h4 class="footer-title">Top Categories</h4>
+          <ul>
+            <li><a href="/products/?category=electronics">Electronics</a></li>
+            <li><a href="/products/?category=fashion">Fashion & Apparel</a></li>
+            <li><a href="/products/?category=home-kitchen">Home & Kitchen</a></li>
+            <li><a href="/products/?category=sports-fitness">Sports & Fitness</a></li>
+            <li><a href="/products/?category=books">Books</a></li>
+          </ul>
+        </div>
+
+        <!-- Newsletter & Contact -->
+        <div class="footer-newsletter">
+          <h4 class="footer-title">Stay in Touch</h4>
+          <p>Subscribe for exclusive discounts, new arrival alerts, and flash sales.</p>
+          <form class="newsletter-form" onsubmit="handleNewsletter(event)">
+            <div class="newsletter-input-group">
+              <input type="email" id="newsletterEmail" placeholder="Enter your email" required class="form-input">
+              <button type="submit" class="btn btn-primary">Subscribe</button>
+            </div>
+          </form>
+          <div class="contact-info-mini">
+            <span>📍 Mumbai, Maharashtra, India</span>
+            <span>📧 support@novamart.com</span>
+            <span>📞 +91 98765 43210</span>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- Footer Bottom Bar -->
+      <div class="footer-bottom">
+        <p class="copyright">&copy; 2024 NOVA MART. Developed for CodeAlpha Full Stack Internship – Task 1.</p>
+        <div class="payment-badges-row">
+          <span class="pay-pill">💵 Cash On Delivery</span>
+          <span class="pay-pill">🔒 256-Bit SSL</span>
+          <span class="pay-pill">⚡ Express Shipping</span>
+        </div>
+      </div>
+    </div>
+  </footer>
+
+  <!-- Toast Container -->
+  <div class="toast-container" id="toastContainer" aria-live="polite"></div>
+
+  <!-- Shared Core Scripts -->
+  <script src="{% static 'js/utils.js' %}"></script>
+  <script src="{% static 'js/cart.js' %}"></script>
+  
+  <script>
+    // Global Header & Navigation Functions
+    function handleNavSearch(e) {
+      e.preventDefault();
+      const input = document.getElementById('navSearchInput') || document.getElementById('mobileSearchInput');
+      const val = input ? input.value.trim() : '';
+      if (val) {
+        window.location.href = '/products/?search=' + encodeURIComponent(val);
+      } else {
+        window.location.href = '/products/';
+      }
+    }
+
+    function toggleUserMenu() {
+      const dropdown = document.getElementById('userDropdownContent');
+      if (dropdown) dropdown.classList.toggle('show');
+    }
+
+    window.addEventListener('click', (e) => {
+      const menu = document.getElementById('userMenuDropdown');
+      if (menu && !menu.contains(e.target)) {
+        const dropdown = document.getElementById('userDropdownContent');
+        if (dropdown) dropdown.classList.remove('show');
+      }
+    });
+
+    function toggleMobileNav() {
+      const drawer = document.getElementById('mobileDrawer');
+      const overlay = document.getElementById('mobileDrawerOverlay');
+      if (drawer && overlay) {
+        drawer.classList.toggle('open');
+        overlay.classList.toggle('show');
+      }
+    }
+
+    function closeAnnouncement() {
+      const bar = document.getElementById('announcementBar');
+      if (bar) bar.style.display = 'none';
+      sessionStorage.setItem('nova_announcement_closed', 'true');
+    }
+
+    if (sessionStorage.getItem('nova_announcement_closed') === 'true') {
+      const bar = document.getElementById('announcementBar');
+      if (bar) bar.style.display = 'none';
+    }
+
+    function handleNewsletter(e) {
+      e.preventDefault();
+      const input = document.getElementById('newsletterEmail');
+      if (input && input.value) {
+        Toast.success('Thank you for subscribing to NOVA MART! 🎉 Check your email for a special discount code.');
+        input.value = '';
+      }
+    }
+
+    async function logoutUser() {
+      try {
+        await apiCall('/api/auth/logout/', 'POST');
+      } catch (err) {
+        // try alternative logout endpoint
+        try { await apiCall('/api/logout/', 'POST'); } catch(e) {}
+      }
+      Toast.info('Logged out successfully.');
+      setTimeout(() => { window.location.href = '/'; }, 600);
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+      if (typeof Cart !== 'undefined' && Cart.load) {
+        Cart.load();
+      }
+      if (typeof Wishlist !== 'undefined' && Wishlist.updateUI) {
+        Wishlist.updateUI();
+      }
+    });
+  </script>
+
+  {% block extra_js %}{% endblock %}
+</body>
+</html>

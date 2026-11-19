@@ -1,0 +1,284 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Checkout{% endblock %}
+
+{% block extra_css %}
+<style>
+  .checkout-container {
+    padding: 40px 0 80px;
+  }
+  .checkout-steps {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 16px;
+    margin-bottom: 36px;
+  }
+  .step-pill {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 18px;
+    border-radius: var(--radius-full);
+    font-size: 0.9rem;
+    font-weight: 600;
+    background: var(--bg-secondary);
+    color: var(--text-secondary);
+  }
+  .step-pill.active {
+    background: var(--primary);
+    color: #fff;
+  }
+  .step-arrow {
+    color: var(--text-light);
+  }
+  .checkout-layout {
+    display: grid;
+    grid-template-columns: 1fr 420px;
+    gap: 36px;
+    align-items: start;
+  }
+  .checkout-box {
+    background: #fff;
+    border-radius: var(--radius-lg);
+    border: 1px solid var(--border);
+    box-shadow: var(--shadow-sm);
+    padding: 28px;
+    margin-bottom: 24px;
+  }
+  .checkout-box h3 {
+    font-size: 1.25rem;
+    font-weight: 700;
+    margin-bottom: 20px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .form-group {
+    margin-bottom: 18px;
+  }
+  .form-group label {
+    display: block;
+    font-size: 0.88rem;
+    font-weight: 600;
+    margin-bottom: 6px;
+    color: var(--text-primary);
+  }
+  .form-control {
+    width: 100%;
+    padding: 12px 16px;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-md);
+    font-size: 0.95rem;
+    transition: all 0.2s;
+  }
+  .form-control:focus {
+    outline: none;
+    border-color: var(--primary);
+    box-shadow: 0 0 0 3px var(--primary-100);
+  }
+  .form-grid-2 {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+  }
+  .form-grid-3 {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 16px;
+  }
+  .payment-card {
+    border: 2px solid var(--primary);
+    background: var(--primary-50);
+    border-radius: var(--radius-md);
+    padding: 16px 20px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 12px;
+    cursor: pointer;
+  }
+  .payment-card.disabled {
+    border-color: var(--border);
+    background: var(--bg-secondary);
+    opacity: 0.7;
+    cursor: not-allowed;
+  }
+  .order-summary-sidebar {
+    background: #fff;
+    border-radius: var(--radius-lg);
+    border: 1px solid var(--border);
+    box-shadow: var(--shadow-sm);
+    padding: 24px;
+    position: sticky;
+    top: 90px;
+  }
+  .mini-item-row {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    padding: 12px 0;
+    border-bottom: 1px solid var(--border);
+  }
+  .mini-item-img {
+    width: 60px;
+    height: 60px;
+    object-fit: contain;
+    border-radius: var(--radius-sm);
+    background: var(--bg-secondary);
+  }
+  .mini-item-info {
+    flex: 1;
+  }
+  .mini-item-info h5 {
+    font-size: 0.9rem;
+    margin-bottom: 4px;
+  }
+  .mini-item-info span {
+    font-size: 0.8rem;
+    color: var(--text-secondary);
+  }
+  .mini-item-price {
+    font-weight: 700;
+    color: var(--primary);
+    font-size: 0.95rem;
+  }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container checkout-container">
+
+  <!-- Checkout Stepper -->
+  <div class="checkout-steps">
+    <div class="step-pill">1. Shopping Cart</div>
+    <span class="step-arrow">&rarr;</span>
+    <div class="step-pill active">2. Shipping & Payment</div>
+    <span class="step-arrow">&rarr;</span>
+    <div class="step-pill">3. Order Confirmation</div>
+  </div>
+
+  <div class="checkout-layout">
+
+    <!-- Left: Shipping & Checkout Form -->
+    <div class="checkout-form-wrapper">
+      <form id="checkoutForm" onsubmit="handlePlaceOrder(event)">
+
+        <!-- Contact Information -->
+        <div class="checkout-box animate-on-scroll">
+          <h3>👤 Contact Information</h3>
+          <div class="form-grid-2">
+            <div class="form-group">
+              <label for="fullName">Full Name *</label>
+              <input type="text" id="fullName" class="form-control" placeholder="John Doe" value="{{ user.get_full_name|default:'' }}" required>
+            </div>
+            <div class="form-group">
+              <label for="email">Email Address *</label>
+              <input type="email" id="email" class="form-control" placeholder="john@example.com" value="{{ user.email|default:'' }}" required>
+            </div>
+          </div>
+          <div class="form-group">
+            <label for="phone">Phone Number *</label>
+            <input type="tel" id="phone" class="form-control" placeholder="+91 98765 43210" value="{{ user.phone|default:'' }}" required>
+          </div>
+        </div>
+
+        <!-- Shipping Address -->
+        <div class="checkout-box animate-on-scroll">
+          <h3>📍 Shipping Address</h3>
+          <div class="form-group">
+            <label for="shippingAddress">Street Address / House No. *</label>
+            <textarea id="shippingAddress" rows="2" class="form-control" placeholder="Flat No., Building name, Street name, Area" required>{{ user.address|default:'' }}</textarea>
+          </div>
+          <div class="form-grid-3">
+            <div class="form-group">
+              <label for="city">City *</label>
+              <input type="text" id="city" class="form-control" placeholder="Mumbai" value="{{ user.city|default:'' }}" required>
+            </div>
+            <div class="form-group">
+              <label for="state">State *</label>
+              <input type="text" id="state" class="form-control" placeholder="Maharashtra" value="{{ user.state|default:'' }}" required>
+            </div>
+            <div class="form-group">
+              <label for="pincode">PIN Code *</label>
+              <input type="text" id="pincode" class="form-control" placeholder="400001" maxlength="10" value="{{ user.pincode|default:'' }}" required>
+            </div>
+          </div>
+        </div>
+
+        <!-- Payment Method -->
+        <div class="checkout-box animate-on-scroll">
+          <h3>💳 Payment Method</h3>
+
+          <!-- COD (Available) -->
+          <label class="payment-card">
+            <div style="display:flex; align-items:center; gap:12px;">
+              <input type="radio" name="payment_method" value="cod" checked>
+              <div>
+                <strong>Cash on Delivery (COD)</strong>
+                <p style="font-size:0.85rem; color:var(--text-secondary); margin:2px 0 0;">Pay with cash or UPI directly when your order is delivered to your doorstep.</p>
+              </div>
+            </div>
+            <span class="badge badge-sale" style="background:#27AE60;">Available</span>
+          </label>
+
+          <!-- Online Payment (Coming Soon) -->
+          <label class="payment-card disabled">
+            <div style="display:flex; align-items:center; gap:12px;">
+              <input type="radio" name="payment_method" value="online" disabled>
+              <div>
+                <strong>Online Payment (UPI, Credit/Debit Card, Net Banking)</strong>
+                <p style="font-size:0.85rem; color:var(--text-secondary); margin:2px 0 0;">Payment gateway integration coming soon.</p>
+              </div>
+            </div>
+            <span class="badge badge-new" style="background:#718096;">Coming Soon</span>
+          </label>
+        </div>
+
+        <!-- Submit Button -->
+        <button type="submit" id="placeOrderBtn" class="btn btn-primary btn-lg btn-block" style="display:block; width:100%; font-size:1.1rem; padding:16px;">
+          🚀 Confirm & Place Order (Cash on Delivery)
+        </button>
+
+      </form>
+    </div>
+
+    <!-- Right: Order Summary -->
+    <div class="order-summary-sidebar animate-on-scroll">
+      <h3 style="font-size:1.2rem; font-weight:700; margin-bottom:16px; border-bottom:1px solid var(--border); padding-bottom:10px;">
+        Order Review
+      </h3>
+
+      <div id="checkoutItemsList" style="max-height:300px; overflow-y:auto; margin-bottom:16px;">
+        <p style="color:var(--text-secondary); text-align:center;">Loading items...</p>
+      </div>
+
+      <div class="summary-line">
+        <span>Subtotal</span>
+        <span id="checkoutSubtotal">₹0.00</span>
+      </div>
+
+      <div class="summary-line">
+        <span>Shipping</span>
+        <span id="checkoutShipping">FREE</span>
+      </div>
+
+      <div class="summary-line summary-total">
+        <span>Total Payable</span>
+        <span id="checkoutTotal" style="color:var(--primary);">₹0.00</span>
+      </div>
+
+      <div style="margin-top:20px; font-size:0.85rem; color:var(--text-light); text-align:center;">
+        🔒 All transactions are secured and encrypted with 256-bit SSL.
+      </div>
+    </div>
+
+  </div>
+
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="{% static 'js/checkout.js' %}"></script>
+{% endblock %}

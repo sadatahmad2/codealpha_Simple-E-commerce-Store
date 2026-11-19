@@ -1,0 +1,202 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Create Account{% endblock %}
+
+{% block extra_css %}
+<style>
+  .auth-page-wrapper {
+    padding: 60px 20px 100px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: calc(100vh - 200px);
+  }
+  .auth-card {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    background: #fff;
+    border-radius: var(--radius-xl);
+    box-shadow: var(--shadow-xl);
+    border: 1px solid var(--border);
+    max-width: 950px;
+    width: 100%;
+    overflow: hidden;
+  }
+  .auth-banner-side {
+    background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+    color: #fff;
+    padding: 48px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+  }
+  .auth-banner-content h2 {
+    font-size: 2rem;
+    font-weight: 800;
+    margin-bottom: 12px;
+  }
+  .auth-form-side {
+    padding: 40px 48px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+  }
+  .auth-form-side h1 {
+    font-size: 1.85rem;
+    font-weight: 800;
+    margin-bottom: 6px;
+  }
+  .auth-subtitle {
+    color: var(--text-secondary);
+    margin-bottom: 24px;
+    font-size: 0.95rem;
+  }
+  .input-password-wrap {
+    position: relative;
+  }
+  .password-toggle-btn {
+    position: absolute;
+    right: 14px;
+    top: 50%;
+    transform: translateY(-50%);
+    background: none;
+    border: none;
+    cursor: pointer;
+    font-size: 1.1rem;
+    color: var(--text-secondary);
+  }
+  .strength-meter-bar {
+    height: 4px;
+    background: var(--border);
+    border-radius: 2px;
+    margin-top: 6px;
+    overflow: hidden;
+  }
+  .strength-fill {
+    height: 100%;
+    width: 0%;
+    transition: all 0.3s;
+  }
+  @media (max-width: 768px) {
+    .auth-card {
+      grid-template-columns: 1fr;
+    }
+    .auth-banner-side {
+      display: none;
+    }
+    .auth-form-side {
+      padding: 32px 20px;
+    }
+  }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="auth-page-wrapper">
+  <div class="auth-card animate-on-scroll">
+
+    <!-- Left Brand Banner -->
+    <div class="auth-banner-side">
+      <div>
+        <div style="display:flex; align-items:center; gap:8px; margin-bottom:24px;">
+          <svg viewBox="0 0 32 32" width="32" height="32" fill="none">
+            <rect width="32" height="32" rx="8" fill="#FFFFFF"/>
+            <path d="M18 4L8 18h7l-3 10 12-14h-7z" fill="#6C63FF"/>
+          </svg>
+          <span style="font-weight:800; font-size:1.3rem;">NOVA MART</span>
+        </div>
+        <div class="auth-banner-content">
+          <h2>Join NOVA MART</h2>
+          <p>Create your free account today and unlock a premium shopping experience.</p>
+          <ul style="list-style:none; padding:0; line-height:2.2;">
+            <li>🎁 <strong>10% OFF</strong> First Order With Code NOVA10</li>
+            <li>🚚 <strong>Free Shipping</strong> on orders above ₹999</li>
+            <li>🔄 <strong>Easy 30-Day</strong> Hassle-Free Returns</li>
+            <li>🔒 <strong>Secure COD</strong> and Fast Processing</li>
+          </ul>
+        </div>
+      </div>
+      <div style="font-size:0.85rem; opacity:0.8;">
+        &copy; 2024 NOVA MART E-Commerce Platform
+      </div>
+    </div>
+
+    <!-- Right Register Form -->
+    <div class="auth-form-side">
+      <h1>Create Account</h1>
+      <p class="auth-subtitle">
+        Already registered? <a href="/login/" style="color:var(--primary); font-weight:600;">Sign in here &rarr;</a>
+      </p>
+
+      <form id="registerForm" onsubmit="handleUserRegister(event)" method="post">
+        {% csrf_token %}
+        <div class="form-grid-2">
+          <div class="form-group">
+            <label for="regFirstName">First Name</label>
+            <input type="text" id="regFirstName" name="first_name" class="form-control" placeholder="John">
+          </div>
+          <div class="form-group">
+            <label for="regLastName">Last Name</label>
+            <input type="text" id="regLastName" name="last_name" class="form-control" placeholder="Doe">
+          </div>
+        </div>
+
+        <div class="form-grid-2">
+          <div class="form-group">
+            <label for="regUsername">Username *</label>
+            <input type="text" id="regUsername" name="username" class="form-control" placeholder="johndoe" required autocomplete="username">
+          </div>
+          <div class="form-group">
+            <label for="regEmail">Email Address *</label>
+            <input type="email" id="regEmail" name="email" class="form-control" placeholder="john@example.com" required autocomplete="email">
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label for="regPhone">Phone Number</label>
+          <input type="tel" id="regPhone" name="phone" class="form-control" placeholder="+91 98765 43210">
+        </div>
+
+        <div class="form-grid-2">
+          <div class="form-group">
+            <label for="regPassword">Password *</label>
+            <div class="input-password-wrap">
+              <input type="password" id="regPassword" name="password" class="form-control" placeholder="Min 8 characters" required oninput="evaluatePasswordStrength(this.value)">
+              <button type="button" class="password-toggle-btn" onclick="togglePasswordVisibility('regPassword', this)">👁️</button>
+            </div>
+            <div class="strength-meter-bar">
+              <div id="strengthFill" class="strength-fill"></div>
+            </div>
+            <small id="strengthText" style="font-size:0.75rem; color:var(--text-light);"></small>
+          </div>
+
+          <div class="form-group">
+            <label for="regPassword2">Confirm Password *</label>
+            <div class="input-password-wrap">
+              <input type="password" id="regPassword2" name="password2" class="form-control" placeholder="Repeat password" required>
+              <button type="button" class="password-toggle-btn" onclick="togglePasswordVisibility('regPassword2', this)">👁️</button>
+            </div>
+          </div>
+        </div>
+
+        <div style="margin-bottom:20px;">
+          <label style="display:flex; align-items:center; gap:8px; font-size:0.85rem; color:var(--text-secondary); cursor:pointer;">
+            <input type="checkbox" id="agreeTerms" required checked>
+            <span>I agree to the <a href="javascript:void(0)" style="color:var(--primary);">Terms of Use</a> and <a href="javascript:void(0)" style="color:var(--primary);">Privacy Policy</a>.</span>
+          </label>
+        </div>
+
+        <button type="submit" id="registerBtn" class="btn btn-primary btn-lg btn-block" style="width:100%; padding:14px;">
+          Create My Account &rarr;
+        </button>
+      </form>
+    </div>
+
+  </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="{% static 'js/auth.js' %}"></script>
+{% endblock %}

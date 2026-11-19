@@ -1,0 +1,334 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}{{ product.name|default:'Product' }} - Nova Mart{% endblock %}
+
+{% block extra_js %}<script src="{% static 'js/product_detail.js' %}"></script>{% endblock %}
+
+{% block content %}
+
+<!-- =============================================
+     BREADCRUMB
+     ============================================= -->
+<div class="page-header product-detail-header">
+  <div class="container">
+    <nav class="breadcrumb">
+      <a href="/">Home</a>
+      <span class="breadcrumb-sep">&rsaquo;</span>
+      <a href="/products/">Products</a>
+      <span class="breadcrumb-sep">&rsaquo;</span>
+      {% if product.category %}
+        <a href="/products/?category={{ product.category.slug }}">{{ product.category.name }}</a>
+        <span class="breadcrumb-sep">&rsaquo;</span>
+      {% endif %}
+      <span>{{ product.name }}</span>
+    </nav>
+  </div>
+</div>
+
+<!-- =============================================
+     MAIN PRODUCT SECTION
+     ============================================= -->
+<div class="container">
+  <div class="product-detail-layout">
+
+    <!-- =========================================
+         LEFT COLUMN: IMAGE GALLERY
+         ========================================= -->
+    <div class="product-gallery">
+
+      <!-- Main Image -->
+      <div class="main-image-wrap">
+        <img
+          id="mainImage"
+          src="{{ product.image_url }}"
+          alt="{{ product.name }}"
+          class="main-product-image"
+        >
+        {% if product.discount_percent > 0 %}
+          <span class="image-badge badge-discount">-{{ product.discount_percent }}%</span>
+        {% endif %}
+        {% if product.is_trending %}
+          <span class="image-badge badge-trending" style="top: 50px;">🔥</span>
+        {% endif %}
+        <!-- Zoom hint -->
+        <div class="zoom-hint">🔍 Click image to zoom</div>
+      </div>
+
+      <!-- Thumbnail Strip -->
+      <div class="thumbnail-strip" id="thumbnailStrip">
+        <!-- Main image thumbnail -->
+        <img
+          src="{{ product.image_url }}"
+          class="thumbnail active"
+          alt="{{ product.name }}"
+          onclick="switchImage(this, '{{ product.image_url }}')"
+        >
+        <!-- Additional gallery images -->
+        {% for img in product.images.all %}
+          <img
+            src="{{ img.image.url }}"
+            class="thumbnail"
+            alt="{{ img.alt_text|default:product.name }}"
+            onclick="switchImage(this, '{{ img.image.url }}')"
+          >
+        {% endfor %}
+      </div>
+
+    </div><!-- /.product-gallery -->
+
+    <!-- =========================================
+         RIGHT COLUMN: PRODUCT INFO
+         ========================================= -->
+    <div class="product-info-panel">
+
+      <!-- Badges row -->
+      <div class="product-badges-row">
+        {% if product.is_featured %}<span class="badge badge-featured">⭐ Featured</span>{% endif %}
+        {% if product.is_trending %}<span class="badge badge-trending">🔥 Trending</span>{% endif %}
+        {% if product.is_bestseller %}<span class="badge badge-bestseller">🏆 Best Seller</span>{% endif %}
+        {% if product.stock == 0 %}<span class="badge badge-out-of-stock">Out of Stock</span>{% endif %}
+      </div>
+
+      <!-- Product Title -->
+      <h1 class="product-title">{{ product.name }}</h1>
+
+      <!-- Rating Row (dynamically updated) -->
+      <div class="product-rating-row">
+        <div class="stars" id="starsDisplay">★★★★☆</div>
+        <span class="rating-value" id="avgRating">Loading...</span>
+        <span class="review-count" id="reviewCount">(0 reviews)</span>
+        <a href="#reviewsTab" class="write-review-link" onclick="switchTab('reviews', event)">Write a review</a>
+      </div>
+
+      <!-- Price Panel -->
+      <div class="product-price-panel">
+        {% if product.discount_price %}
+          <span class="price-big">₹{{ product.discount_price|floatformat:2 }}</span>
+          <span class="price-original-big">₹{{ product.price|floatformat:2 }}</span>
+          <span class="savings-badge">Save {{ product.discount_percent }}% off</span>
+        {% else %}
+          <span class="price-big">₹{{ product.price|floatformat:2 }}</span>
+        {% endif %}
+      </div>
+
+      <!-- Stock Status -->
+      <div class="product-stock-status">
+        {% if product.stock > 10 %}
+          <span class="in-stock">✅ In Stock ({{ product.stock }} available)</span>
+        {% elif product.stock > 0 %}
+          <span class="low-stock">⚠️ Only {{ product.stock }} left! Order soon.</span>
+        {% else %}
+          <span class="out-of-stock">❌ Currently Out of Stock</span>
+        {% endif %}
+      </div>
+
+      <!-- Short Description -->
+      {% if product.short_description %}
+      <div class="product-description-short">
+        <p>{{ product.short_description }}</p>
+      </div>
+      {% endif %}
+
+      <!-- Quantity + CTA Buttons (shown only when in stock) -->
+      {% if product.stock > 0 %}
+      <div class="quantity-selector">
+        <label for="quantityInput">Quantity:</label>
+        <div class="qty-controls">
+          <button class="qty-btn" onclick="changeQty(-1)" aria-label="Decrease quantity">−</button>
+          <input
+            type="number"
+            id="quantityInput"
+            value="1"
+            min="1"
+            max="{{ product.stock }}"
+            class="qty-input"
+            aria-label="Quantity"
+          >
+          <button class="qty-btn" onclick="changeQty(1)" aria-label="Increase quantity">+</button>
+        </div>
+      </div>
+
+      <div class="product-cta-buttons">
+        <button
+          class="btn btn-primary btn-lg"
+          onclick="addToCartDetail({{ product.id }})"
+          id="addToCartBtn"
+        >
+          🛒 Add to Cart
+        </button>
+        <button
+          class="btn btn-dark btn-lg"
+          onclick="buyNow({{ product.id }})"
+        >
+          ⚡ Buy Now
+        </button>
+        <button
+          class="btn-icon wishlist-detail-btn"
+          onclick="toggleWishlistDetail({{ product.id }})"
+          id="wishlistDetailBtn"
+          aria-label="Add to wishlist"
+          title="Add to Wishlist"
+        >
+          🤍
+        </button>
+      </div>
+      {% else %}
+      <div class="out-of-stock-actions">
+        <button class="btn btn-secondary btn-lg" disabled>😔 Out of Stock</button>
+        <button class="btn btn-outline btn-lg" onclick="notifyWhenAvailable()">🔔 Notify Me</button>
+      </div>
+      {% endif %}
+
+      <!-- Product Meta (SKU, Category) -->
+      <div class="product-meta">
+        {% if product.category %}
+        <span>
+          <strong>Category:</strong>
+          <a href="/products/?category={{ product.category.slug }}">{{ product.category.name }}</a>
+        </span>
+        {% endif %}
+        <span><strong>SKU:</strong> NM-{{ product.id|stringformat:'04d' }}</span>
+        <span><strong>Product ID:</strong> <span id="productIdData">{{ product.id }}</span></span>
+      </div>
+
+      <!-- Delivery Info -->
+      <div class="delivery-info">
+        <div class="delivery-item">🚚 Free delivery on orders above ₹999</div>
+        <div class="delivery-item">🔒 100% Secure checkout</div>
+        <div class="delivery-item">↩️ 30-day hassle-free return policy</div>
+        <div class="delivery-item">🎧 24/7 customer support</div>
+      </div>
+
+    </div><!-- /.product-info-panel -->
+
+  </div><!-- /.product-detail-layout -->
+
+  <!-- =============================================
+       PRODUCT TABS: DESCRIPTION + REVIEWS
+       ============================================= -->
+  <div class="product-tabs" id="productTabs">
+
+    <div class="tab-buttons" role="tablist">
+      <button
+        class="tab-btn active"
+        id="tabBtnDescription"
+        role="tab"
+        aria-selected="true"
+        aria-controls="descriptionTab"
+        onclick="switchTab('description', event)"
+      >
+        Description
+      </button>
+      <button
+        class="tab-btn"
+        id="tabBtnReviews"
+        role="tab"
+        aria-selected="false"
+        aria-controls="reviewsTab"
+        onclick="switchTab('reviews', event)"
+      >
+        Reviews (<span id="reviewTabCount">0</span>)
+      </button>
+    </div><!-- /.tab-buttons -->
+
+    <!-- Description Tab -->
+    <div class="tab-content active" id="descriptionTab" role="tabpanel" aria-labelledby="tabBtnDescription">
+      <div class="product-full-description">
+        {{ product.description|linebreaks }}
+      </div>
+    </div>
+
+    <!-- Reviews Tab -->
+    <div class="tab-content" id="reviewsTab" role="tabpanel" aria-labelledby="tabBtnReviews">
+
+      <!-- Review Summary Bar -->
+      <div class="reviews-summary" id="reviewsSummary" style="display:none;">
+        <div class="reviews-avg-big" id="reviewsAvgBig">0.0</div>
+        <div class="reviews-summary-right">
+          <div class="reviews-stars-big" id="reviewsStarsBig"></div>
+          <div class="reviews-total-count" id="reviewsTotalCount">0 reviews</div>
+          <div class="rating-bars" id="ratingBars"></div>
+        </div>
+      </div>
+
+      <!-- Review Form (authenticated users only) -->
+      {% if user.is_authenticated %}
+      <div class="review-form" id="reviewForm">
+        <h3>Write a Review</h3>
+        <div class="rating-input" id="ratingInput">
+          <span class="star-input" data-rating="1">★</span>
+          <span class="star-input" data-rating="2">★</span>
+          <span class="star-input" data-rating="3">★</span>
+          <span class="star-input" data-rating="4">★</span>
+          <span class="star-input" data-rating="5">★</span>
+          <span class="rating-label" id="ratingLabel">Select a rating</span>
+        </div>
+        <textarea
+          id="reviewComment"
+          placeholder="Share your experience with this product — what did you like or dislike?"
+          class="form-input review-textarea"
+          rows="4"
+          maxlength="1000"
+        ></textarea>
+        <div class="review-form-footer">
+          <span class="char-count" id="charCount">0 / 1000</span>
+          <button class="btn btn-primary" onclick="submitReview({{ product.id }})" id="submitReviewBtn">
+            Submit Review
+          </button>
+        </div>
+      </div>
+      {% else %}
+      <div class="review-login-prompt">
+        <p>🔐 <a href="/login/?next={{ request.path }}">Log in</a> to write a review.</p>
+      </div>
+      {% endif %}
+
+      <!-- Reviews List -->
+      <div class="reviews-list" id="reviewsList">
+        <div class="reviews-loading">
+          <div class="skeleton review-skeleton"></div>
+          <div class="skeleton review-skeleton"></div>
+        </div>
+      </div>
+
+      <!-- Load More Reviews -->
+      <div class="reviews-pagination" id="reviewsPagination"></div>
+
+    </div><!-- /#reviewsTab -->
+
+  </div><!-- /.product-tabs -->
+
+</div><!-- /.container -->
+
+<!-- =============================================
+     RELATED PRODUCTS SECTION
+     ============================================= -->
+<section class="section related-products">
+  <div class="container">
+    <div class="section-header">
+      <div>
+        <h2 class="section-title">Related Products</h2>
+        <p class="section-subtitle">You might also like these</p>
+      </div>
+      {% if product.category %}
+      <a href="/products/?category={{ product.category.slug }}" class="view-all-link">View All →</a>
+      {% endif %}
+    </div>
+    <div class="products-grid" id="relatedProducts">
+      <!-- Loaded by JS -->
+      <div class="skeleton product-card-skeleton"></div>
+      <div class="skeleton product-card-skeleton"></div>
+      <div class="skeleton product-card-skeleton"></div>
+      <div class="skeleton product-card-skeleton"></div>
+    </div>
+  </div>
+</section>
+
+<!-- Image Zoom Modal -->
+<div class="image-zoom-modal" id="imageZoomModal" onclick="closeZoomModal()">
+  <button class="zoom-close-btn" onclick="closeZoomModal()">✕</button>
+  <img id="zoomedImage" src="" alt="Product zoom" class="zoomed-image">
+</div>
+
+{% endblock %}

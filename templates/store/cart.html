@@ -1,0 +1,206 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Shopping Cart{% endblock %}
+
+{% block extra_css %}
+<style>
+  .cart-container {
+    padding: 40px 0 80px;
+  }
+  .cart-header-title {
+    font-size: 2rem;
+    font-weight: 700;
+    margin-bottom: 24px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+  .cart-layout {
+    display: grid;
+    grid-template-columns: 1fr 380px;
+    gap: 32px;
+    align-items: start;
+  }
+  .cart-items-table {
+    background: #fff;
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-sm);
+    border: 1px solid var(--border);
+    overflow: hidden;
+  }
+  .cart-item-row {
+    display: grid;
+    grid-template-columns: 100px 1fr 140px 120px 40px;
+    align-items: center;
+    padding: 20px;
+    border-bottom: 1px solid var(--border);
+    gap: 16px;
+  }
+  .cart-item-row:last-child {
+    border-bottom: none;
+  }
+  .cart-item-img {
+    width: 100px;
+    height: 100px;
+    object-fit: contain;
+    border-radius: var(--radius-md);
+    background: var(--bg-secondary);
+    padding: 6px;
+  }
+  .cart-item-info h4 {
+    font-size: 1.05rem;
+    margin-bottom: 6px;
+  }
+  .cart-item-info a {
+    color: var(--text-primary);
+    text-decoration: none;
+    font-weight: 600;
+  }
+  .cart-item-info a:hover {
+    color: var(--primary);
+  }
+  .cart-item-price {
+    font-size: 0.95rem;
+    color: var(--text-secondary);
+  }
+  .qty-box {
+    display: inline-flex;
+    align-items: center;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-full);
+    overflow: hidden;
+  }
+  .qty-btn {
+    width: 32px;
+    height: 32px;
+    background: var(--bg-secondary);
+    border: none;
+    font-size: 1.1rem;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background 0.2s;
+  }
+  .qty-btn:hover {
+    background: var(--border);
+  }
+  .qty-val {
+    width: 40px;
+    text-align: center;
+    font-weight: 600;
+    font-size: 0.95rem;
+  }
+  .cart-item-subtotal {
+    font-size: 1.15rem;
+    font-weight: 700;
+    color: var(--primary);
+  }
+  .cart-item-del {
+    background: none;
+    border: none;
+    font-size: 1.25rem;
+    color: var(--text-light);
+    cursor: pointer;
+    transition: color 0.2s;
+  }
+  .cart-item-del:hover {
+    color: var(--danger);
+  }
+  .cart-summary-card {
+    background: #fff;
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-sm);
+    border: 1px solid var(--border);
+    padding: 24px;
+    position: sticky;
+    top: 90px;
+  }
+  .cart-summary-card h3 {
+    font-size: 1.35rem;
+    font-weight: 700;
+    margin-bottom: 20px;
+    border-bottom: 1px solid var(--border);
+    padding-bottom: 12px;
+  }
+  .summary-line {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 14px;
+    font-size: 0.95rem;
+    color: var(--text-secondary);
+  }
+  .summary-total {
+    font-size: 1.25rem;
+    font-weight: 800;
+    color: var(--text-primary);
+    border-top: 1px solid var(--border);
+    padding-top: 14px;
+    margin-top: 14px;
+  }
+  .coupon-box {
+    margin: 20px 0;
+    display: flex;
+    gap: 8px;
+  }
+  .coupon-box input {
+    flex: 1;
+    padding: 10px 14px;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-md);
+    font-size: 0.9rem;
+    text-transform: uppercase;
+  }
+  .empty-cart-state {
+    text-align: center;
+    padding: 80px 20px;
+    background: #fff;
+    border-radius: var(--radius-lg);
+    border: 1px solid var(--border);
+  }
+  .empty-cart-icon {
+    font-size: 4rem;
+    margin-bottom: 20px;
+    opacity: 0.6;
+  }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container cart-container">
+  
+  <!-- Breadcrumb -->
+  <nav class="breadcrumb" style="margin-bottom: 20px;">
+    <a href="/">Home</a>
+    <span class="breadcrumb-sep">&rsaquo;</span>
+    <span>Shopping Cart</span>
+  </nav>
+
+  <h1 class="cart-header-title">
+    <span>🛒 Your Shopping Cart</span>
+    <span id="cartTotalItemsCount" style="font-size:1.1rem; color:var(--text-secondary); font-weight:normal;"></span>
+  </h1>
+
+  <!-- Cart Content Area (populated dynamically by cart_page.js) -->
+  <div id="cartContentArea">
+    <div style="text-align: center; padding: 60px 0;">
+      <p>Loading your shopping cart...</p>
+    </div>
+  </div>
+
+  <!-- Recommended Products -->
+  <section class="section" style="padding-top: 60px;">
+    <div class="section-header">
+      <h2 class="section-title">Recommended For You</h2>
+      <a href="/products/" class="btn btn-secondary btn-sm">Explore All</a>
+    </div>
+    <div class="products-grid" id="cartRecommendedGrid"></div>
+  </section>
+
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="{% static 'js/cart_page.js' %}"></script>
+{% endblock %}

@@ -1,0 +1,28 @@
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Virtual environments
+venv/
+env/
+ENV/
+.venv/
+
+# macOS files
+.DS_Store
+.AppleDouble
+.LSOverride
+
+# Environment variables
+.env.local
+
+# Media files uploaded by users
+media/products/
+media/categories/
+
+# IDE / Editor files
+.vscode/
+.idea/
+*.sublime-project
+*.sublime-workspace
