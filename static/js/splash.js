@@ -1,6 +1,6 @@
 /**
  * splash.js — 3D Endless Corridor Splash Screen for NOVA MART
- * Always renders on every page load and refresh with a 15-second immersion timer.
+ * Full-screen clean 3D corridor with 15-second timer and matching "Go to Home Screen" action.
  */
 (function () {
   'use strict';
@@ -23,17 +23,9 @@
   const Z_FAR = -2600;
   const Z_NEAR = 800;
   const RANGE = Z_NEAR - Z_FAR;
-  const DURATION = 16000; // 16s loop for full 3D corridor cycle
+  const DURATION = 16000; // 16s loop
   const TOTAL = SPLASH_IMAGES.length;
-  const SPLASH_TOTAL_SECONDS = 15; // 15 seconds timer requested
-
-  const STATUS_MESSAGES = [
-    { at: 15, text: "✨ Loading exclusive NOVA MART collection..." },
-    { at: 12, text: "🚀 Calibrating 3D interactive shopping experience..." },
-    { at: 9,  text: "💎 Unlocking member-exclusive deals and fast delivery..." },
-    { at: 6,  text: "🛍️ Preparing luxury catalog & trending products..." },
-    { at: 3,  text: "🎉 Welcome to NOVA MART · Entering now..." },
-  ];
+  const SPLASH_TOTAL_SECONDS = 15; // 15s auto-redirect
 
   document.addEventListener('DOMContentLoaded', initSplash);
 
@@ -41,22 +33,19 @@
     const splash = document.getElementById('novaSplashScreen');
     const world = document.getElementById('novaSplashWorld');
     const enterBtn = document.getElementById('novaSplashEnterBtn');
-    const skipBtn = document.getElementById('novaSplashSkipBtn');
     const timerLabel = document.getElementById('novaSplashTimer');
-    const progressFill = document.getElementById('novaSplashProgressFill');
-    const statusText = document.getElementById('novaSplashStatus');
 
     if (!splash || !world) return;
 
-    // Lock page scrolling while splash is running
+    // Lock page scrolling while splash is active
     document.body.style.overflow = 'hidden';
 
-    // Setup 3D image planes
+    // Build 3D corridor image planes
     const planes = [];
     const width = window.innerWidth;
-    const planeW = width < 768 ? Math.min(width * 0.36, 220) : Math.min(width * 0.28, 440);
+    const planeW = width < 768 ? Math.min(width * 0.42, 240) : Math.min(width * 0.32, 480);
     const planeH = planeW * (4 / 3);
-    const offsetX = width * 0.35;
+    const offsetX = width * 0.36;
     const angle = 22;
 
     world.innerHTML = '';
@@ -75,7 +64,7 @@
 
       const img = document.createElement('img');
       img.src = url;
-      img.alt = 'Nova Mart 3D Spotlight ' + (i + 1);
+      img.alt = 'Nova Mart 3D Gallery Plane ' + (i + 1);
       img.loading = 'eager';
       plane.appendChild(img);
 
@@ -113,7 +102,7 @@
 
     animId = requestAnimationFrame(render);
 
-    // 15-Second High-Precision Progress & Countdown
+    // 15-Second Timer Countdown
     const splashStartTime = Date.now();
     const splashEndTime = splashStartTime + SPLASH_TOTAL_SECONDS * 1000;
 
@@ -121,33 +110,16 @@
       const now = Date.now();
       const remainingMs = Math.max(0, splashEndTime - now);
       const remainingSec = Math.ceil(remainingMs / 1000);
-      const elapsedMs = Math.min(SPLASH_TOTAL_SECONDS * 1000, now - splashStartTime);
-      const progressPercent = (elapsedMs / (SPLASH_TOTAL_SECONDS * 1000)) * 100;
 
-      // Update progress bar
-      if (progressFill) {
-        progressFill.style.width = `${progressPercent.toFixed(1)}%`;
-      }
-
-      // Update countdown label
       if (timerLabel) {
-        timerLabel.textContent = `Auto-entering in ${remainingSec}s`;
-      }
-
-      // Update dynamic status message
-      if (statusText) {
-        for (let i = 0; i < STATUS_MESSAGES.length; i++) {
-          if (remainingSec <= STATUS_MESSAGES[i].at) {
-            statusText.textContent = STATUS_MESSAGES[i].text;
-          }
-        }
+        timerLabel.textContent = `${remainingSec}s`;
       }
 
       if (remainingMs <= 0) {
         clearInterval(timerInterval);
         dismissSplash();
       }
-    }, 100);
+    }, 250);
 
     function dismissSplash() {
       if (timerInterval) clearInterval(timerInterval);
@@ -162,6 +134,5 @@
     }
 
     if (enterBtn) enterBtn.addEventListener('click', dismissSplash);
-    if (skipBtn) skipBtn.addEventListener('click', dismissSplash);
   }
 })();
