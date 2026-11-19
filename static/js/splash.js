@@ -1,6 +1,8 @@
 /**
  * splash.js — 3D Endless Corridor Splash Screen for NOVA MART
- * Full-screen clean 3D corridor with 15-second timer and matching "Go to Home Screen" action.
+ * - Shows on initial store visit and on manual page refresh (Cmd+R / F5 / Reload button).
+ * - Does NOT intercept or re-trigger on button taps, links, or internal page navigation.
+ * - Only runs on the homepage (/).
  */
 (function () {
   'use strict';
@@ -23,9 +25,9 @@
   const Z_FAR = -2600;
   const Z_NEAR = 800;
   const RANGE = Z_NEAR - Z_FAR;
-  const DURATION = 16000; // 16s loop
+  const DURATION = 16000;
   const TOTAL = SPLASH_IMAGES.length;
-  const SPLASH_TOTAL_SECONDS = 15; // 15s auto-redirect
+  const SPLASH_TOTAL_SECONDS = 15;
 
   document.addEventListener('DOMContentLoaded', initSplash);
 
@@ -37,8 +39,39 @@
 
     if (!splash || !world) return;
 
+    // 1. Only run splash on homepage root (/ or /home/)
+    const path = window.location.pathname;
+    const isHome = path === '/' || path === '' || path === '/home/' || path.endsWith('/home/');
+    if (!isHome) {
+      splash.style.display = 'none';
+      return;
+    }
+
+    // 2. Check if this is an explicit browser page refresh/reload
+    let isExplicitReload = false;
+    try {
+      const navEntries = performance.getEntriesByType('navigation');
+      if (navEntries && navEntries.length > 0) {
+        isExplicitReload = navEntries[0].type === 'reload';
+      } else if (performance.navigation) {
+        isExplicitReload = performance.navigation.type === 1;
+      }
+    } catch (e) {
+      isExplicitReload = false;
+    }
+
+    // 3. Check if user already dismissed splash in current session
+    const alreadyDismissed = sessionStorage.getItem('nova_mart_splash_dismissed');
+
+    // If dismissed and NOT an explicit refresh, don't show splash (prevents button taps from re-triggering)
+    if (alreadyDismissed === '1' && !isExplicitReload) {
+      splash.style.display = 'none';
+      return;
+    }
+
     // Lock page scrolling while splash is active
     document.body.style.overflow = 'hidden';
+    splash.style.display = 'flex';
 
     // Build 3D corridor image planes
     const planes = [];
@@ -84,7 +117,7 @@
         let p = (item.startProgress + baseProgress) % 1;
         let z = Z_FAR + p * RANGE;
 
-        // Opacity easing curve for entering and leaving corridor
+        // Opacity easing curve
         let opacity = 1;
         if (p < 0.08) opacity = p / 0.08;
         else if (p > 0.94) opacity = (1 - p) / 0.06;
@@ -121,9 +154,13 @@
       }
     }, 250);
 
-    function dismissSplash() {
+    function dismissSplash(e) {
+      if (e && e.preventDefault) e.preventDefault();
       if (timerInterval) clearInterval(timerInterval);
       if (animId) cancelAnimationFrame(animId);
+
+      // Mark dismissed so internal navigation and buttons never reload the splash
+      sessionStorage.setItem('nova_mart_splash_dismissed', '1');
 
       splash.classList.add('hidden-splash');
       document.body.style.overflow = '';
@@ -133,6 +170,8 @@
       }, 850);
     }
 
-    if (enterBtn) enterBtn.addEventListener('click', dismissSplash);
+    if (enterBtn) {
+      enterBtn.addEventListener('click', dismissSplash);
+    }
   }
 })();

@@ -54,7 +54,7 @@
     <div class="announcement-content">
       <span>🎉 <strong>FLASH SALE!</strong> Get up to 50% off today & free delivery on orders above ₹999. Use code <strong>NOVA10</strong></span>
     </div>
-    <button class="announcement-close" id="announcementClose" aria-label="Close Announcement" onclick="closeAnnouncement()">&times;</button>
+    <button type="button" class="announcement-close" id="announcementClose" aria-label="Close Announcement" onclick="closeAnnouncement()">&times;</button>
   </div>
 
   <!-- =============================================
@@ -134,7 +134,7 @@
         <!-- Auth / Profile -->
         {% if user.is_authenticated %}
           <div class="user-menu-dropdown" id="userMenuDropdown">
-            <button class="user-menu-btn" onclick="toggleUserMenu()" aria-expanded="false">
+            <button type="button" class="user-menu-btn" onclick="toggleUserMenu()" aria-expanded="false">
               <span class="user-avatar-small">{{ user.first_name|first|default:user.username|first|upper }}</span>
               <span class="user-name-text">{{ user.first_name|default:user.username }}</span>
               <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -164,7 +164,7 @@
         {% endif %}
 
         <!-- Mobile Hamburger Button -->
-        <button class="hamburger-btn" id="mobileMenuToggle" aria-label="Toggle menu" onclick="toggleMobileNav()">
+        <button type="button" class="hamburger-btn" id="mobileMenuToggle" aria-label="Toggle menu" onclick="toggleMobileNav()">
           <span></span>
           <span></span>
           <span></span>
@@ -182,7 +182,7 @@
       <div class="drawer-logo">
         <span class="logo-text">NOVA<span class="logo-accent">MART</span></span>
       </div>
-      <button class="drawer-close" onclick="toggleMobileNav()">&times;</button>
+      <button type="button" class="drawer-close" onclick="toggleMobileNav()">&times;</button>
     </div>
     
     <div class="mobile-search-wrap">
