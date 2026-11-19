@@ -27,7 +27,7 @@
   const RANGE = Z_NEAR - Z_FAR;
   const DURATION = 16000;
   const TOTAL = SPLASH_IMAGES.length;
-  const SPLASH_TOTAL_SECONDS = 15;
+  const SPLASH_TOTAL_SECONDS = 6;
 
   document.addEventListener('DOMContentLoaded', initSplash);
 
