@@ -1,5 +1,6 @@
 /**
  * splash.js — 3D Endless Corridor Splash Screen for NOVA MART
+ * Always renders on every page load and refresh with a 15-second immersion timer.
  */
 (function () {
   'use strict';
@@ -19,11 +20,20 @@
     "https://images.unsplash.com/photo-1593359677879-a4bb92f829d1?w=800&auto=format&fit=crop&q=80"
   ];
 
-  const Z_FAR = -2400;
-  const Z_NEAR = 780;
+  const Z_FAR = -2600;
+  const Z_NEAR = 800;
   const RANGE = Z_NEAR - Z_FAR;
-  const DURATION = 16000; // 16 seconds loop
+  const DURATION = 16000; // 16s loop for full 3D corridor cycle
   const TOTAL = SPLASH_IMAGES.length;
+  const SPLASH_TOTAL_SECONDS = 15; // 15 seconds timer requested
+
+  const STATUS_MESSAGES = [
+    { at: 15, text: "✨ Loading exclusive NOVA MART collection..." },
+    { at: 12, text: "🚀 Calibrating 3D interactive shopping experience..." },
+    { at: 9,  text: "💎 Unlocking member-exclusive deals and fast delivery..." },
+    { at: 6,  text: "🛍️ Preparing luxury catalog & trending products..." },
+    { at: 3,  text: "🎉 Welcome to NOVA MART · Entering now..." },
+  ];
 
   document.addEventListener('DOMContentLoaded', initSplash);
 
@@ -33,27 +43,23 @@
     const enterBtn = document.getElementById('novaSplashEnterBtn');
     const skipBtn = document.getElementById('novaSplashSkipBtn');
     const timerLabel = document.getElementById('novaSplashTimer');
+    const progressFill = document.getElementById('novaSplashProgressFill');
+    const statusText = document.getElementById('novaSplashStatus');
 
     if (!splash || !world) return;
 
-    // Check if user already entered in this tab session
-    const seen = sessionStorage.getItem('nova_mart_splash_seen');
-    if (seen === '1' && window.location.search.indexOf('splash=1') === -1) {
-      splash.style.display = 'none';
-      return;
-    }
-
-    // Lock page scrolling while splash is active
+    // Lock page scrolling while splash is running
     document.body.style.overflow = 'hidden';
 
-    // Create 3D image planes
+    // Setup 3D image planes
     const planes = [];
     const width = window.innerWidth;
-    const planeW = width < 768 ? Math.min(width * 0.34, 220) : Math.min(width * 0.28, 440);
+    const planeW = width < 768 ? Math.min(width * 0.36, 220) : Math.min(width * 0.28, 440);
     const planeH = planeW * (4 / 3);
     const offsetX = width * 0.35;
     const angle = 22;
 
+    world.innerHTML = '';
     SPLASH_IMAGES.forEach((url, i) => {
       const plane = document.createElement('div');
       plane.className = 'nova-splash-plane';
@@ -66,11 +72,10 @@
 
       plane.dataset.x = posX;
       plane.dataset.rotY = rotY;
-      plane.dataset.progress = String(i / TOTAL);
 
       const img = document.createElement('img');
       img.src = url;
-      img.alt = 'Nova Mart 3D Gallery Item';
+      img.alt = 'Nova Mart 3D Spotlight ' + (i + 1);
       img.loading = 'eager';
       plane.appendChild(img);
 
@@ -78,7 +83,7 @@
       planes.push({ el: plane, img: img, startProgress: i / TOTAL });
     });
 
-    // Animation Loop
+    // 3D Corridor Rendering Loop
     let startTime = performance.now();
     let animId = null;
 
@@ -90,7 +95,7 @@
         let p = (item.startProgress + baseProgress) % 1;
         let z = Z_FAR + p * RANGE;
 
-        // Opacity curve
+        // Opacity easing curve for entering and leaving corridor
         let opacity = 1;
         if (p < 0.08) opacity = p / 0.08;
         else if (p > 0.94) opacity = (1 - p) / 0.06;
@@ -108,25 +113,48 @@
 
     animId = requestAnimationFrame(render);
 
-    // Auto-enter timer countdown (3 seconds)
-    let countdown = 3;
-    const countdownInterval = setInterval(() => {
-      countdown--;
-      if (timerLabel && countdown > 0) {
-        timerLabel.textContent = `Auto-entering in ${countdown}s...`;
-      } else if (countdown <= 0) {
-        clearInterval(countdownInterval);
+    // 15-Second High-Precision Progress & Countdown
+    const splashStartTime = Date.now();
+    const splashEndTime = splashStartTime + SPLASH_TOTAL_SECONDS * 1000;
+
+    const timerInterval = setInterval(() => {
+      const now = Date.now();
+      const remainingMs = Math.max(0, splashEndTime - now);
+      const remainingSec = Math.ceil(remainingMs / 1000);
+      const elapsedMs = Math.min(SPLASH_TOTAL_SECONDS * 1000, now - splashStartTime);
+      const progressPercent = (elapsedMs / (SPLASH_TOTAL_SECONDS * 1000)) * 100;
+
+      // Update progress bar
+      if (progressFill) {
+        progressFill.style.width = `${progressPercent.toFixed(1)}%`;
+      }
+
+      // Update countdown label
+      if (timerLabel) {
+        timerLabel.textContent = `Auto-entering in ${remainingSec}s`;
+      }
+
+      // Update dynamic status message
+      if (statusText) {
+        for (let i = 0; i < STATUS_MESSAGES.length; i++) {
+          if (remainingSec <= STATUS_MESSAGES[i].at) {
+            statusText.textContent = STATUS_MESSAGES[i].text;
+          }
+        }
+      }
+
+      if (remainingMs <= 0) {
+        clearInterval(timerInterval);
         dismissSplash();
       }
-    }, 1000);
+    }, 100);
 
     function dismissSplash() {
-      if (countdownInterval) clearInterval(countdownInterval);
+      if (timerInterval) clearInterval(timerInterval);
       if (animId) cancelAnimationFrame(animId);
 
       splash.classList.add('hidden-splash');
       document.body.style.overflow = '';
-      sessionStorage.setItem('nova_mart_splash_seen', '1');
 
       setTimeout(() => {
         splash.style.display = 'none';
