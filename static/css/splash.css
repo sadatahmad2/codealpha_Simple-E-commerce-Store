@@ -1,0 +1,182 @@
+/* ============================================================
+   3D ENDLESS CORRIDOR SPLASH SCREEN — NOVA MART
+   ============================================================ */
+
+.nova-splash-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 999999;
+  background-color: #060709;
+  color: #ffffff;
+  overflow: hidden;
+  user-select: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: opacity 0.8s cubic-bezier(0.16, 1, 0.3, 1), visibility 0.8s;
+}
+
+.nova-splash-overlay.hidden-splash {
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+}
+
+.nova-splash-scene {
+  position: absolute;
+  inset: 0;
+  perspective: 1100px;
+  perspective-origin: 50% 50%;
+  transform-style: preserve-3d;
+  pointer-events: none;
+}
+
+.nova-splash-world {
+  position: absolute;
+  inset: 0;
+  transform-style: preserve-3d;
+  transform: translate3d(0, 0, 0);
+}
+
+.nova-splash-plane {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  border-radius: 14px;
+  overflow: hidden;
+  background: #111;
+  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.85), 0 0 0 1px rgba(255, 255, 255, 0.15);
+  transform-style: preserve-3d;
+  backface-visibility: hidden;
+  will-change: transform, opacity;
+  pointer-events: none;
+}
+
+.nova-splash-plane img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+/* Ambient Radial Glow */
+.nova-splash-overlay::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(circle at 50% 50%, rgba(99, 102, 241, 0.15) 0%, transparent 70%);
+  pointer-events: none;
+  z-index: 2;
+}
+
+/* Center Content */
+.nova-splash-center {
+  position: relative;
+  z-index: 50;
+  text-align: center;
+  padding: 24px;
+  max-width: 680px;
+  animation: splashFadeUp 0.9s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+@keyframes splashFadeUp {
+  from {
+    opacity: 0;
+    transform: translateY(24px) scale(0.96);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+.nova-splash-badge {
+  display: inline-block;
+  padding: 6px 16px;
+  border-radius: 9999px;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: #c7d2fe;
+  background: rgba(99, 102, 241, 0.15);
+  border: 1px solid rgba(99, 102, 241, 0.35);
+  backdrop-filter: blur(12px);
+  margin-bottom: 16px;
+}
+
+.nova-splash-title {
+  font-size: clamp(2.5rem, 8vw, 5.5rem);
+  font-weight: 900;
+  letter-spacing: 0.14em;
+  line-height: 1;
+  text-transform: uppercase;
+  margin: 0 0 12px 0;
+  background: linear-gradient(135deg, #ffffff 20%, #c7d2fe 60%, #6366f1 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  filter: drop-shadow(0 8px 32px rgba(99, 102, 241, 0.45));
+}
+
+.nova-splash-subtitle {
+  color: #94a3b8;
+  font-size: clamp(0.85rem, 2vw, 1.05rem);
+  font-weight: 500;
+  letter-spacing: 0.05em;
+  margin: 0 0 28px 0;
+}
+
+.nova-splash-actions {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+}
+
+.nova-splash-btn {
+  padding: 14px 36px;
+  border-radius: 9999px;
+  background: #ffffff;
+  color: #0b0f19;
+  font-size: 15px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  border: none;
+  cursor: pointer;
+  box-shadow: 0 4px 25px rgba(255, 255, 255, 0.3), 0 0 0 1px rgba(255, 255, 255, 0.5);
+  transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.nova-splash-btn:hover {
+  transform: translateY(-2px) scale(1.03);
+  box-shadow: 0 8px 35px rgba(255, 255, 255, 0.5);
+}
+
+.nova-splash-timer {
+  font-size: 12px;
+  color: #64748b;
+  letter-spacing: 0.04em;
+}
+
+.nova-splash-skip {
+  position: absolute;
+  top: 24px;
+  right: 28px;
+  z-index: 60;
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  color: #cbd5e1;
+  padding: 6px 14px;
+  border-radius: 9999px;
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.05em;
+  cursor: pointer;
+  backdrop-filter: blur(8px);
+  transition: all 0.2s ease;
+}
+
+.nova-splash-skip:hover {
+  background: rgba(255, 255, 255, 0.18);
+  color: #ffffff;
+}

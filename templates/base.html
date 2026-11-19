@@ -19,9 +19,38 @@
   <link rel="stylesheet" href="{% static 'css/base.css' %}">
   <link rel="stylesheet" href="{% static 'css/components.css' %}">
   <link rel="stylesheet" href="{% static 'css/responsive.css' %}">
+  <link rel="stylesheet" href="{% static 'css/splash.css' %}">
   {% block extra_css %}{% endblock %}
 </head>
 <body>
+
+  <!-- =============================================
+       3D ENDLESS CORRIDOR SPLASH SCREEN
+       ============================================= -->
+  <div id="novaSplashScreen" class="nova-splash-overlay" aria-label="Nova Mart 3D Entrance Splash">
+    <div class="nova-splash-scene">
+      <div class="nova-splash-world" id="novaSplashWorld"></div>
+    </div>
+    
+    <div class="nova-splash-center">
+      <span class="nova-splash-badge">✨ Next-Gen Luxury Shopping</span>
+      <h1 class="nova-splash-title">NOVA MART</h1>
+      <p class="nova-splash-subtitle">Ideas that move brands forward · Shop The Future</p>
+      <div class="nova-splash-actions">
+        <button id="novaSplashEnterBtn" class="nova-splash-btn" type="button">
+          Enter Store &rarr;
+        </button>
+        <span class="nova-splash-timer" id="novaSplashTimer">Auto-entering in 3s...</span>
+      </div>
+    </div>
+
+    <button id="novaSplashSkipBtn" class="nova-splash-skip" type="button" aria-label="Skip Splash">
+      Skip &times;
+    </button>
+  </div>
+
+  <!-- Splash Script -->
+  <script src="{% static 'js/splash.js' %}"></script>
 
   <!-- =============================================
        ANNOUNCEMENT BAR
